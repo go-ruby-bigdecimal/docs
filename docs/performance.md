@@ -71,76 +71,86 @@ five runtimes** before any timing.
   Interpreter start-up is outside the timed region, so these are operation costs,
   not `ruby file.rb` process costs.
 
+> **Updated 2026-07-03 (allocation-reduction pass).** A hot-path rework — cached
+> powers of ten, an allocation-free digit counter, in-place magnitude handling,
+> and a single-pass decimal parser (see
+> [bigdecimal#1](https://github.com/go-ruby-bigdecimal/bigdecimal/pull/1)) — moved
+> the library from *slower than MRI on three ops* to **faster than MRI on all six**
+> and **faster than MRI + YJIT on five of six**. The `vs YJIT` column below is the
+> pure-Go ns/op divided by the MRI + YJIT ns/op (`< 1.00×` = faster than YJIT).
+
 #### add
 
-| Runtime | ns/op | vs MRI |
-| --- | ---: | ---: |
-| **go-ruby (pure Go)** | 149.2 | 1.36× |
-| MRI | 110.0 | 1.00× |
-| MRI + YJIT | 92.0 | 0.84× |
-| JRuby | 267.4 | 2.43× |
-| TruffleRuby | 3219.1 | 29.26× |
+| Runtime | ns/op | vs MRI | vs YJIT |
+| --- | ---: | ---: | ---: |
+| **go-ruby (pure Go)** | 59.1 | **0.53×** | **0.64×** |
+| MRI | 112.5 | 1.00× | — |
+| MRI + YJIT | 93.0 | 0.83× | 1.00× |
+| JRuby | 292.9 | 2.60× | — |
+| TruffleRuby | 3247.9 | 28.87× | — |
 
 #### mul
 
-| Runtime | ns/op | vs MRI |
-| --- | ---: | ---: |
-| **go-ruby (pure Go)** | 133.0 | 0.54× |
-| MRI | 247.0 | 1.00× |
-| MRI + YJIT | 212.0 | 0.86× |
-| JRuby | 356.6 | 1.44× |
-| TruffleRuby | 2284.0 | 9.25× |
+| Runtime | ns/op | vs MRI | vs YJIT |
+| --- | ---: | ---: | ---: |
+| **go-ruby (pure Go)** | 110.1 | **0.44×** | **0.52×** |
+| MRI | 249.5 | 1.00× | — |
+| MRI + YJIT | 212.5 | 0.85× | 1.00× |
+| JRuby | 361.7 | 1.45× | — |
+| TruffleRuby | 2379.1 | 9.54× | — |
 
 #### div
 
-| Runtime | ns/op | vs MRI |
-| --- | ---: | ---: |
-| **go-ruby (pure Go)** | 1014.8 | 2.22× |
-| MRI | 458.0 | 1.00× |
-| MRI + YJIT | 420.0 | 0.92× |
-| JRuby | 751.7 | 1.64× |
-| TruffleRuby | 4121.3 | 9.00× |
+| Runtime | ns/op | vs MRI | vs YJIT |
+| --- | ---: | ---: | ---: |
+| **go-ruby (pure Go)** | 347.1 | **0.76×** | **0.80×** |
+| MRI | 454.0 | 1.00× | — |
+| MRI + YJIT | 436.0 | 0.96× | 1.00× |
+| JRuby | 884.8 | 1.95× | — |
+| TruffleRuby | 4444.1 | 9.79× | — |
 
 #### newton-sqrt
 
-| Runtime | ns/op | vs MRI |
-| --- | ---: | ---: |
-| **go-ruby (pure Go)** | 41275.0 | 2.83× |
-| MRI | 14575.0 | 1.00× |
-| MRI + YJIT | 13975.0 | 0.96× |
-| JRuby | 24310.4 | 1.67× |
-| TruffleRuby | 205846.9 | 14.12× |
+| Runtime | ns/op | vs MRI | vs YJIT |
+| --- | ---: | ---: | ---: |
+| **go-ruby (pure Go)** | 12418.8 | **0.85×** | **0.89×** |
+| MRI | 14550.0 | 1.00× | — |
+| MRI + YJIT | 13950.0 | 0.96× | 1.00× |
+| JRuby | 24740.6 | 1.70× | — |
+| TruffleRuby | 209974.0 | 14.43× | — |
 
 #### parse
 
-| Runtime | ns/op | vs MRI |
-| --- | ---: | ---: |
-| **go-ruby (pure Go)** | 558.3 | 2.89× |
-| MRI | 193.0 | 1.00× |
-| MRI + YJIT | 137.0 | 0.71× |
-| JRuby | 310.1 | 1.61× |
-| TruffleRuby | 3192.5 | 16.54× |
+| Runtime | ns/op | vs MRI | vs YJIT |
+| --- | ---: | ---: | ---: |
+| **go-ruby (pure Go)** | 156.4 | **0.88×** | 1.06× |
+| MRI | 178.5 | 1.00× | — |
+| MRI + YJIT | 147.5 | 0.83× | 1.00× |
+| JRuby | 437.0 | 2.45× | — |
+| TruffleRuby | 3257.6 | 18.25× | — |
 
 #### to_s
 
-| Runtime | ns/op | vs MRI |
-| --- | ---: | ---: |
-| **go-ruby (pure Go)** | 406.9 | 0.31× |
-| MRI | 1329.5 | 1.00× |
-| MRI + YJIT | 1260.5 | 0.95× |
-| JRuby | 804.6 | 0.61× |
-| TruffleRuby | 3446.4 | 2.59× |
+| Runtime | ns/op | vs MRI | vs YJIT |
+| --- | ---: | ---: | ---: |
+| **go-ruby (pure Go)** | 242.2 | **0.18×** | **0.19×** |
+| MRI | 1325.5 | 1.00× | — |
+| MRI + YJIT | 1309.0 | 0.99× | 1.00× |
+| JRuby | 1217.1 | 0.92× | — |
+| TruffleRuby | 3534.2 | 2.67× | — |
 
-**Reading the tranche.** The pure-Go library **beats MRI's C extension on two of
-the six operations** — `mul` (0.54×) and `to_s` (0.31×, over 3× faster than the C
-`to_s`) — and is at parity on `add` (1.36×). The slower rows are all where MRI's C
-core is hard to beat from Go: `div` (2.22×) and `parse` (2.89×) go through
-`math/big` allocation and digit scanning, and `newton-sqrt` (2.83×) is simply
-20 iterations of that same `div` plus an `add`, so it inherits the `div` gap. Even
-so, every operation stays **well within an order of magnitude of MRI**, and the
-Go library is **faster than cold JRuby** on `div`, `newton-sqrt` and `parse`. The
-clear optimization targets are the `div` inner loop (which also lifts
-`newton-sqrt`) and the parse digit-scan fast path.
+**Reading the tranche.** The pure-Go library is now **faster than MRI's C
+extension on all six operations** and **faster than MRI + YJIT on five of the
+six** — `add` (0.64× YJIT), `mul` (0.52×), `div` (0.80×), `newton-sqrt` (0.89×,
+which it inherits from the `div` win it is built on) and `to_s` (0.19×, over 5×
+faster than the C `to_s`). The one row that does not clear YJIT is `parse`, and it
+still **beats MRI** (0.88×): it lands ~6 % above YJIT because building a
+`math/big` significand requires a **decimal→binary conversion** that MRI's
+base-10⁹ `BigDecimal` storage never performs, plus a handful of `math/big` heap
+allocations against MRI's C arena — an honest representational floor, not a missing
+optimization. Closing it would mean abandoning `math/big` for a decimal-limb
+representation, which would regress the arithmetic rows that now *beat* YJIT. Every
+operation is also **several times faster than cold JRuby and TruffleRuby**.
 
 !!! note "Reproduce"
     The harness is committed under
