@@ -733,6 +733,15 @@ five runtimes</strong> before any timing.</p>
   Interpreter start-up is outside the timed region, so these are operation costs,
   not <code>ruby file.rb</code> process costs.</li>
 </ul>
+<blockquote>
+<p><strong>Updated 2026-07-03 (allocation-reduction pass).</strong> A hot-path rework — cached
+powers of ten, an allocation-free digit counter, in-place magnitude handling,
+and a single-pass decimal parser (see
+<a href="https://github.com/go-ruby-bigdecimal/bigdecimal/pull/1">bigdecimal#1</a>) — moved
+the library from <em>slower than MRI on three ops</em> to <strong>faster than MRI on all six</strong>
+and <strong>faster than MRI + YJIT on five of six</strong>. The <code>vs YJIT</code> column below is the
+pure-Go ns/op divided by the MRI + YJIT ns/op (<code>&lt; 1.00×</code> = faster than YJIT).</p>
+</blockquote>
 <h4 id="add">add<a class="headerlink" href="#add" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -740,33 +749,39 @@ five runtimes</strong> before any timing.</p>
 <th>Runtime</th>
 <th style="text-align: right;">ns/op</th>
 <th style="text-align: right;">vs MRI</th>
+<th style="text-align: right;">vs YJIT</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>go-ruby (pure Go)</strong></td>
-<td style="text-align: right;">149.2</td>
-<td style="text-align: right;">1.36×</td>
+<td style="text-align: right;">59.1</td>
+<td style="text-align: right;"><strong>0.53×</strong></td>
+<td style="text-align: right;"><strong>0.64×</strong></td>
 </tr>
 <tr>
 <td>MRI</td>
-<td style="text-align: right;">110.0</td>
+<td style="text-align: right;">112.5</td>
 <td style="text-align: right;">1.00×</td>
+<td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>MRI + YJIT</td>
-<td style="text-align: right;">92.0</td>
-<td style="text-align: right;">0.84×</td>
+<td style="text-align: right;">93.0</td>
+<td style="text-align: right;">0.83×</td>
+<td style="text-align: right;">1.00×</td>
 </tr>
 <tr>
 <td>JRuby</td>
-<td style="text-align: right;">267.4</td>
-<td style="text-align: right;">2.43×</td>
+<td style="text-align: right;">292.9</td>
+<td style="text-align: right;">2.60×</td>
+<td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>TruffleRuby</td>
-<td style="text-align: right;">3219.1</td>
-<td style="text-align: right;">29.26×</td>
+<td style="text-align: right;">3247.9</td>
+<td style="text-align: right;">28.87×</td>
+<td style="text-align: right;">—</td>
 </tr>
 </tbody>
 </table>
@@ -777,33 +792,39 @@ five runtimes</strong> before any timing.</p>
 <th>Runtime</th>
 <th style="text-align: right;">ns/op</th>
 <th style="text-align: right;">vs MRI</th>
+<th style="text-align: right;">vs YJIT</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>go-ruby (pure Go)</strong></td>
-<td style="text-align: right;">133.0</td>
-<td style="text-align: right;">0.54×</td>
+<td style="text-align: right;">110.1</td>
+<td style="text-align: right;"><strong>0.44×</strong></td>
+<td style="text-align: right;"><strong>0.52×</strong></td>
 </tr>
 <tr>
 <td>MRI</td>
-<td style="text-align: right;">247.0</td>
+<td style="text-align: right;">249.5</td>
 <td style="text-align: right;">1.00×</td>
+<td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>MRI + YJIT</td>
-<td style="text-align: right;">212.0</td>
-<td style="text-align: right;">0.86×</td>
+<td style="text-align: right;">212.5</td>
+<td style="text-align: right;">0.85×</td>
+<td style="text-align: right;">1.00×</td>
 </tr>
 <tr>
 <td>JRuby</td>
-<td style="text-align: right;">356.6</td>
-<td style="text-align: right;">1.44×</td>
+<td style="text-align: right;">361.7</td>
+<td style="text-align: right;">1.45×</td>
+<td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>TruffleRuby</td>
-<td style="text-align: right;">2284.0</td>
-<td style="text-align: right;">9.25×</td>
+<td style="text-align: right;">2379.1</td>
+<td style="text-align: right;">9.54×</td>
+<td style="text-align: right;">—</td>
 </tr>
 </tbody>
 </table>
@@ -814,33 +835,39 @@ five runtimes</strong> before any timing.</p>
 <th>Runtime</th>
 <th style="text-align: right;">ns/op</th>
 <th style="text-align: right;">vs MRI</th>
+<th style="text-align: right;">vs YJIT</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>go-ruby (pure Go)</strong></td>
-<td style="text-align: right;">1014.8</td>
-<td style="text-align: right;">2.22×</td>
+<td style="text-align: right;">347.1</td>
+<td style="text-align: right;"><strong>0.76×</strong></td>
+<td style="text-align: right;"><strong>0.80×</strong></td>
 </tr>
 <tr>
 <td>MRI</td>
-<td style="text-align: right;">458.0</td>
+<td style="text-align: right;">454.0</td>
 <td style="text-align: right;">1.00×</td>
+<td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>MRI + YJIT</td>
-<td style="text-align: right;">420.0</td>
-<td style="text-align: right;">0.92×</td>
+<td style="text-align: right;">436.0</td>
+<td style="text-align: right;">0.96×</td>
+<td style="text-align: right;">1.00×</td>
 </tr>
 <tr>
 <td>JRuby</td>
-<td style="text-align: right;">751.7</td>
-<td style="text-align: right;">1.64×</td>
+<td style="text-align: right;">884.8</td>
+<td style="text-align: right;">1.95×</td>
+<td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>TruffleRuby</td>
-<td style="text-align: right;">4121.3</td>
-<td style="text-align: right;">9.00×</td>
+<td style="text-align: right;">4444.1</td>
+<td style="text-align: right;">9.79×</td>
+<td style="text-align: right;">—</td>
 </tr>
 </tbody>
 </table>
@@ -851,33 +878,39 @@ five runtimes</strong> before any timing.</p>
 <th>Runtime</th>
 <th style="text-align: right;">ns/op</th>
 <th style="text-align: right;">vs MRI</th>
+<th style="text-align: right;">vs YJIT</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>go-ruby (pure Go)</strong></td>
-<td style="text-align: right;">41275.0</td>
-<td style="text-align: right;">2.83×</td>
+<td style="text-align: right;">12418.8</td>
+<td style="text-align: right;"><strong>0.85×</strong></td>
+<td style="text-align: right;"><strong>0.89×</strong></td>
 </tr>
 <tr>
 <td>MRI</td>
-<td style="text-align: right;">14575.0</td>
+<td style="text-align: right;">14550.0</td>
 <td style="text-align: right;">1.00×</td>
+<td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>MRI + YJIT</td>
-<td style="text-align: right;">13975.0</td>
+<td style="text-align: right;">13950.0</td>
 <td style="text-align: right;">0.96×</td>
+<td style="text-align: right;">1.00×</td>
 </tr>
 <tr>
 <td>JRuby</td>
-<td style="text-align: right;">24310.4</td>
-<td style="text-align: right;">1.67×</td>
+<td style="text-align: right;">24740.6</td>
+<td style="text-align: right;">1.70×</td>
+<td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>TruffleRuby</td>
-<td style="text-align: right;">205846.9</td>
-<td style="text-align: right;">14.12×</td>
+<td style="text-align: right;">209974.0</td>
+<td style="text-align: right;">14.43×</td>
+<td style="text-align: right;">—</td>
 </tr>
 </tbody>
 </table>
@@ -888,33 +921,39 @@ five runtimes</strong> before any timing.</p>
 <th>Runtime</th>
 <th style="text-align: right;">ns/op</th>
 <th style="text-align: right;">vs MRI</th>
+<th style="text-align: right;">vs YJIT</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>go-ruby (pure Go)</strong></td>
-<td style="text-align: right;">558.3</td>
-<td style="text-align: right;">2.89×</td>
+<td style="text-align: right;">156.4</td>
+<td style="text-align: right;"><strong>0.88×</strong></td>
+<td style="text-align: right;">1.06×</td>
 </tr>
 <tr>
 <td>MRI</td>
-<td style="text-align: right;">193.0</td>
+<td style="text-align: right;">178.5</td>
 <td style="text-align: right;">1.00×</td>
+<td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>MRI + YJIT</td>
-<td style="text-align: right;">137.0</td>
-<td style="text-align: right;">0.71×</td>
+<td style="text-align: right;">147.5</td>
+<td style="text-align: right;">0.83×</td>
+<td style="text-align: right;">1.00×</td>
 </tr>
 <tr>
 <td>JRuby</td>
-<td style="text-align: right;">310.1</td>
-<td style="text-align: right;">1.61×</td>
+<td style="text-align: right;">437.0</td>
+<td style="text-align: right;">2.45×</td>
+<td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>TruffleRuby</td>
-<td style="text-align: right;">3192.5</td>
-<td style="text-align: right;">16.54×</td>
+<td style="text-align: right;">3257.6</td>
+<td style="text-align: right;">18.25×</td>
+<td style="text-align: right;">—</td>
 </tr>
 </tbody>
 </table>
@@ -925,46 +964,54 @@ five runtimes</strong> before any timing.</p>
 <th>Runtime</th>
 <th style="text-align: right;">ns/op</th>
 <th style="text-align: right;">vs MRI</th>
+<th style="text-align: right;">vs YJIT</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>go-ruby (pure Go)</strong></td>
-<td style="text-align: right;">406.9</td>
-<td style="text-align: right;">0.31×</td>
+<td style="text-align: right;">242.2</td>
+<td style="text-align: right;"><strong>0.18×</strong></td>
+<td style="text-align: right;"><strong>0.19×</strong></td>
 </tr>
 <tr>
 <td>MRI</td>
-<td style="text-align: right;">1329.5</td>
+<td style="text-align: right;">1325.5</td>
 <td style="text-align: right;">1.00×</td>
+<td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>MRI + YJIT</td>
-<td style="text-align: right;">1260.5</td>
-<td style="text-align: right;">0.95×</td>
+<td style="text-align: right;">1309.0</td>
+<td style="text-align: right;">0.99×</td>
+<td style="text-align: right;">1.00×</td>
 </tr>
 <tr>
 <td>JRuby</td>
-<td style="text-align: right;">804.6</td>
-<td style="text-align: right;">0.61×</td>
+<td style="text-align: right;">1217.1</td>
+<td style="text-align: right;">0.92×</td>
+<td style="text-align: right;">—</td>
 </tr>
 <tr>
 <td>TruffleRuby</td>
-<td style="text-align: right;">3446.4</td>
-<td style="text-align: right;">2.59×</td>
+<td style="text-align: right;">3534.2</td>
+<td style="text-align: right;">2.67×</td>
+<td style="text-align: right;">—</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Reading the tranche.</strong> The pure-Go library <strong>beats MRI's C extension on two of
-the six operations</strong> — <code>mul</code> (0.54×) and <code>to_s</code> (0.31×, over 3× faster than the C
-<code>to_s</code>) — and is at parity on <code>add</code> (1.36×). The slower rows are all where MRI's C
-core is hard to beat from Go: <code>div</code> (2.22×) and <code>parse</code> (2.89×) go through
-<code>math/big</code> allocation and digit scanning, and <code>newton-sqrt</code> (2.83×) is simply
-20 iterations of that same <code>div</code> plus an <code>add</code>, so it inherits the <code>div</code> gap. Even
-so, every operation stays <strong>well within an order of magnitude of MRI</strong>, and the
-Go library is <strong>faster than cold JRuby</strong> on <code>div</code>, <code>newton-sqrt</code> and <code>parse</code>. The
-clear optimization targets are the <code>div</code> inner loop (which also lifts
-<code>newton-sqrt</code>) and the parse digit-scan fast path.</p>
+<p><strong>Reading the tranche.</strong> The pure-Go library is now <strong>faster than MRI's C
+extension on all six operations</strong> and <strong>faster than MRI + YJIT on five of the
+six</strong> — <code>add</code> (0.64× YJIT), <code>mul</code> (0.52×), <code>div</code> (0.80×), <code>newton-sqrt</code> (0.89×,
+which it inherits from the <code>div</code> win it is built on) and <code>to_s</code> (0.19×, over 5×
+faster than the C <code>to_s</code>). The one row that does not clear YJIT is <code>parse</code>, and it
+still <strong>beats MRI</strong> (0.88×): it lands ~6 % above YJIT because building a
+<code>math/big</code> significand requires a <strong>decimal→binary conversion</strong> that MRI's
+base-10⁹ <code>BigDecimal</code> storage never performs, plus a handful of <code>math/big</code> heap
+allocations against MRI's C arena — an honest representational floor, not a missing
+optimization. Closing it would mean abandoning <code>math/big</code> for a decimal-limb
+representation, which would regress the arithmetic rows that now <em>beat</em> YJIT. Every
+operation is also <strong>several times faster than cold JRuby and TruffleRuby</strong>.</p>
 <div class="admonition note">
 <p class="admonition-title">Reproduce</p>
 <p>The harness is committed under
