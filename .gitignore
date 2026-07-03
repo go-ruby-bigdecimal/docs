@@ -1,3 +1,6 @@
 /site/
 .venv/
 __pycache__/
+
+# `go build` in the benchmark driver leaves a binary named after the module.
+/benchmarks/go/bench
