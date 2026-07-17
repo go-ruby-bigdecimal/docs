@@ -1,2 +1,4 @@
 github.com/go-ruby-bigdecimal/bigdecimal v0.0.0-20260703182024-7d7712771ced h1:QBofxaZXq8CZmk9QdybVKNU9CnJTewvKQJSYMcXu2gM=
 github.com/go-ruby-bigdecimal/bigdecimal v0.0.0-20260703182024-7d7712771ced/go.mod h1:op9nu6Z2gvH8/phs7iJZQWNvUnT2DkJV8wBAl1l0kfE=
+github.com/go-ruby-bigdecimal/bigdecimal v0.0.0-20260717062419-05e9199217e8 h1:mGbEqa3C0JiCbewQgdClFdA6kUpyptPAzyF0yhQpbYA=
+github.com/go-ruby-bigdecimal/bigdecimal v0.0.0-20260717062419-05e9199217e8/go.mod h1:op9nu6Z2gvH8/phs7iJZQWNvUnT2DkJV8wBAl1l0kfE=
