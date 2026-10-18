@@ -1,4 +1,9 @@
-# Roadmap
+---
+title: "Roadmap"
+weight: 40
+---
+
+# Roadmap {#roadmap}
 
 `go-ruby-bigdecimal/bigdecimal` is grown **test-first**, each capability differential-tested against MRI
 rather than built in isolation. Ruby's BigDecimal — the
@@ -14,7 +19,7 @@ deterministic, interpreter-independent slice extracted from rbgo's internals —
 | NaN and infinities | `NaN`, `+Infinity` and `-Infinity` produced and propagated with Ruby's comparison and arithmetic rules. | **Done** |
 | Differential oracle & coverage | A wide value corpus exercised here and by the system `ruby`/`bigdecimal`, compared byte-for-byte; 100% coverage, gofmt + go vet clean, green across all six 64-bit Go arches and three OSes. | **Done** |
 
-## Documented out-of-scope boundaries
+## Documented out-of-scope boundaries {#documented-out-of-scope-boundaries}
 
 These are **deliberate**, recorded so the module's surface is unambiguous:
 
@@ -28,5 +33,5 @@ These are **deliberate**, recorded so the module's surface is unambiguous:
 - **Standalone & reusable.** The module has no dependency on the Ruby runtime;
   the dependency runs the other way.
 
-See [Usage & API](api.md) for the surface and [Why pure Go](why.md) for the
+See [Usage & API]({{< relref "api.md" >}}) for the surface and [Why pure Go]({{< relref "why.md" >}}) for the
 deterministic/interpreter split.
