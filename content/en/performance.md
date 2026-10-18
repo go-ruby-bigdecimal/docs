@@ -1,11 +1,16 @@
-# Performance
+---
+title: "Performance"
+weight: 50
+---
+
+# Performance {#performance}
 
 `go-ruby-bigdecimal/bigdecimal` is the pure-Go library that
 [`rbgo`](https://github.com/go-embedded-ruby/ruby) binds for Ruby's `bigdecimal`. This
 page records a **comparative benchmark** of that module against the reference
 Ruby runtimes, part of the ecosystem-wide per-module parity suite.
 
-## What is measured
+## What is measured {#what-is-measured}
 
 The **same** Ruby script — a sequence of arbitrary-precision `div`/`mul`/`round` operations — is run under every runtime. `rbgo`'s
 number reflects **this pure-Go library doing the work**; every other column is
@@ -24,7 +29,7 @@ before timing.
   (`bigdecimal.rb` + `run.sh`). Reproduce:
   `RBGO=./rbgo TRUFFLE=truffleruby bash bench/modules/run.sh 5`.
 
-## Result (best of 5, ms)
+## Result (best of 5, ms) {#result-best-of-5-ms}
 
 | Runtime | time | vs MRI |
 | --- | ---: | ---: |
@@ -36,15 +41,18 @@ before timing.
 
 rbgo runs on **go-ruby-bigdecimal** at ~1.9x MRI's BigDecimal (itself a C extension) — a strong showing for pure-Go arbitrary precision. TruffleRuby pays very heavy cold warm-up on this row (7640 ms).
 
-!!! note "Honest framing"
-    JRuby and TruffleRuby are timed **cold, single-shot**, so they carry JVM /
-    Graal startup on every run — read them as one-shot `ruby file.rb` costs, the
-    same way `rbgo` and MRI are measured, not as steady-state JIT numbers. Rows
-    that complete in well under ~200 ms carry the most relative noise; treat
-    their ratios as order-of-magnitude. These are real measured numbers from the
-    2026-06-29 run — nothing is cherry-picked.
+{{< callout type="info" >}}
+**Honest framing**
 
-## Library-level benchmark (Go API vs runtimes) — 2026-07-03
+JRuby and TruffleRuby are timed **cold, single-shot**, so they carry JVM /
+Graal startup on every run — read them as one-shot `ruby file.rb` costs, the
+same way `rbgo` and MRI are measured, not as steady-state JIT numbers. Rows
+that complete in well under ~200 ms carry the most relative noise; treat
+their ratios as order-of-magnitude. These are real measured numbers from the
+2026-06-29 run — nothing is cherry-picked.
+{{< /callout >}}
+
+## Library-level benchmark (Go API vs runtimes) — 2026-07-03 {#library-level-benchmark-go-api-vs-runtimes-2026-07-03}
 
 This section measures the **pure-Go library directly, through its Go API** — not
 the `rbgo` interpreter path recorded above. It isolates the library primitive
@@ -79,7 +87,7 @@ five runtimes** before any timing.
 > and **faster than MRI + YJIT on five of six**. The `vs YJIT` column below is the
 > pure-Go ns/op divided by the MRI + YJIT ns/op (`< 1.00×` = faster than YJIT).
 
-#### add
+#### add {#add}
 
 | Runtime | ns/op | vs MRI | vs YJIT |
 | --- | ---: | ---: | ---: |
@@ -89,7 +97,7 @@ five runtimes** before any timing.
 | JRuby | 292.9 | 2.60× | — |
 | TruffleRuby | 3247.9 | 28.87× | — |
 
-#### mul
+#### mul {#mul}
 
 | Runtime | ns/op | vs MRI | vs YJIT |
 | --- | ---: | ---: | ---: |
@@ -99,7 +107,7 @@ five runtimes** before any timing.
 | JRuby | 361.7 | 1.45× | — |
 | TruffleRuby | 2379.1 | 9.54× | — |
 
-#### div
+#### div {#div}
 
 | Runtime | ns/op | vs MRI | vs YJIT |
 | --- | ---: | ---: | ---: |
@@ -109,7 +117,7 @@ five runtimes** before any timing.
 | JRuby | 884.8 | 1.95× | — |
 | TruffleRuby | 4444.1 | 9.79× | — |
 
-#### newton-sqrt
+#### newton-sqrt {#newton-sqrt}
 
 | Runtime | ns/op | vs MRI | vs YJIT |
 | --- | ---: | ---: | ---: |
@@ -119,7 +127,7 @@ five runtimes** before any timing.
 | JRuby | 24740.6 | 1.70× | — |
 | TruffleRuby | 209974.0 | 14.43× | — |
 
-#### parse
+#### parse {#parse}
 
 | Runtime | ns/op | vs MRI | vs YJIT |
 | --- | ---: | ---: | ---: |
@@ -129,7 +137,7 @@ five runtimes** before any timing.
 | JRuby | 437.0 | 2.45× | — |
 | TruffleRuby | 3257.6 | 18.25× | — |
 
-#### to_s
+#### to_s {#to_s}
 
 | Runtime | ns/op | vs MRI | vs YJIT |
 | --- | ---: | ---: | ---: |
@@ -152,26 +160,32 @@ optimization. Closing it would mean abandoning `math/big` for a decimal-limb
 representation, which would regress the arithmetic rows that now *beat* YJIT. Every
 operation is also **several times faster than cold JRuby and TruffleRuby**.
 
-!!! note "Reproduce"
-    The harness is committed under
-    [`benchmarks/`](https://github.com/go-ruby-bigdecimal/docs/tree/main/benchmarks):
-    a self-contained Go driver (`go/`, pins the published library via `go.mod`),
-    the equivalent `ruby/bigdecimal.rb` workload, and `run.sh`. Run
-    `bash benchmarks/run.sh` (add `GOWORK=off` if a parent `go.work` captures the
-    module); env `OUTER`/`WARM` tune the pass budget and
-    `RUBY`/`JRUBY`/`TRUFFLERUBY` select the runtime binaries. Run either driver
-    with `VERIFY=1` to print the `CHECK` lines whose `to_s` strings are
-    byte-identical across all five runtimes.
+{{< callout type="info" >}}
+**Reproduce**
 
-!!! warning "Warm-up budget & noise — honest framing"
-    Numbers reflect a **fixed warm-process budget** (3 warm-up + 25 timed passes
-    in one process). The JVM/GraalVM JITs (JRuby, TruffleRuby) may need a larger
-    warm-up to reach steady state, so their columns can **understate** peak
-    throughput — most visibly **TruffleRuby**, which pays heavy cold-JIT cost
-    here (e.g. `add` at 29×, entirely a warm-up artefact on a ~100 ns op). Rows in
-    the sub-microsecond range carry the most relative noise; treat those ratios as
-    order-of-magnitude. Every number here is a **real measured value** from the
-    dated run above — nothing is fabricated, estimated, or cherry-picked. The
-    go-ruby column is the pure-Go library; every other column is that
-    interpreter's own `bigdecimal` stdlib (a C extension under MRI) doing the
-    equivalent work.
+The harness is committed under
+[`benchmarks/`](https://github.com/go-ruby-bigdecimal/docs/tree/main/benchmarks):
+a self-contained Go driver (`go/`, pins the published library via `go.mod`),
+the equivalent `ruby/bigdecimal.rb` workload, and `run.sh`. Run
+`bash benchmarks/run.sh` (add `GOWORK=off` if a parent `go.work` captures the
+module); env `OUTER`/`WARM` tune the pass budget and
+`RUBY`/`JRUBY`/`TRUFFLERUBY` select the runtime binaries. Run either driver
+with `VERIFY=1` to print the `CHECK` lines whose `to_s` strings are
+byte-identical across all five runtimes.
+{{< /callout >}}
+
+{{< callout type="warning" >}}
+**Warm-up budget & noise — honest framing**
+
+Numbers reflect a **fixed warm-process budget** (3 warm-up + 25 timed passes
+in one process). The JVM/GraalVM JITs (JRuby, TruffleRuby) may need a larger
+warm-up to reach steady state, so their columns can **understate** peak
+throughput — most visibly **TruffleRuby**, which pays heavy cold-JIT cost
+here (e.g. `add` at 29×, entirely a warm-up artefact on a ~100 ns op). Rows in
+the sub-microsecond range carry the most relative noise; treat those ratios as
+order-of-magnitude. Every number here is a **real measured value** from the
+dated run above — nothing is fabricated, estimated, or cherry-picked. The
+go-ruby column is the pure-Go library; every other column is that
+interpreter's own `bigdecimal` stdlib (a C extension under MRI) doing the
+equivalent work.
+{{< /callout >}}

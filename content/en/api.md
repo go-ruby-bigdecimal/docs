@@ -1,18 +1,26 @@
-# Usage & API
+---
+title: "Usage & API"
+weight: 30
+---
+
+# Usage & API {#usage-api}
 
 The public API lives at the module root (`github.com/go-ruby-bigdecimal/bigdecimal`). It is **Ruby-shaped but Go-idiomatic**: `New` / `Add` / `DivPrec` / `Round` / `String` mirror Ruby's `BigDecimal(...)`, `+`, `div`, `round` and `to_s`, while the surface follows Go conventions — value-returning methods, explicit precision and rounding-mode arguments, no global state.
 
-!!! success "Status: implemented"
-    The library is built and importable as `github.com/go-ruby-bigdecimal/bigdecimal`, bound into
-    `rbgo` as a native module; see [Roadmap](roadmap.md).
+{{< callout type="info" >}}
+**Status: implemented**
 
-## Install
+The library is built and importable as `github.com/go-ruby-bigdecimal/bigdecimal`, bound into
+`rbgo` as a native module; see [Roadmap]({{< relref "roadmap.md" >}}).
+{{< /callout >}}
+
+## Install {#install}
 
 ```sh
 go get github.com/go-ruby-bigdecimal/bigdecimal
 ```
 
-## Worked example
+## Worked example {#worked-example}
 
 ```go
 a := bigdecimal.New("0.1")
@@ -21,7 +29,7 @@ s := a.Add(b).String()              // "0.3e0"
 q := a.DivPrec(b, 10)               // division to 10 significant digits
 ```
 
-## Shape
+## Shape {#shape}
 
 ```go
 // New parses a decimal literal into a BigDecimal (Ruby's BigDecimal("...")).
@@ -40,7 +48,7 @@ func (d *BigDecimal) Round(prec int, mode RoundMode) *BigDecimal
 func (d *BigDecimal) String() string
 ```
 
-## MRI conformance
+## MRI conformance {#mri-conformance}
 
 Correctness is defined by reference Ruby. A **differential oracle** runs a wide
 value corpus through both the system `ruby` (with `bigdecimal`) and this library
@@ -48,7 +56,7 @@ and compares the results **byte-for-byte** — not approximated from memory. The
 oracle tests skip themselves where `ruby` is not on `PATH` (e.g. the qemu arch
 lanes), so the cross-arch builds still validate the library.
 
-## Relationship to Ruby
+## Relationship to Ruby {#relationship-to-ruby}
 
 `go-ruby-bigdecimal/bigdecimal` is **standalone and reusable**, and is the backend bound into
 [go-embedded-ruby](https://github.com/go-embedded-ruby/ruby) by `rbgo` as a
